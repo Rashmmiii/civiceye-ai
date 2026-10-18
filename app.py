@@ -113,13 +113,20 @@ def verify_resolution(before_img, after_img, category, api_key):
     )
     return json.loads(response.text)
 
-# --- SIDEBAR AUTH ---
+# --- AUTH & SETUP ---
 st.sidebar.title("👁️ CivicEye AI")
-api_key = st.sidebar.text_input("Enter Gemini API Key", type="password", value=os.environ.get("GEMINI_API_KEY", ""))
 
+# Automatically pull from Streamlit Secrets or Environment Variable
+api_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY", "")
+
+# Fallback: only show the box if the secret wasn't configured
 if not api_key:
-    st.info("👈 Please enter your Google Gemini API Key in the sidebar to start.")
-    st.stop()
+    api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
+    if not api_key:
+        st.info("👈 Please configure GEMINI_API_KEY in Streamlit Secrets or enter it in the sidebar.")
+        st.stop()
+else:
+    st.sidebar.success("🟢 AI Vision Engine Connected")
 
 # --- NAVIGATION TABS ---
 tab_report, tab_map, tab_verify = st.tabs(["📸 Report Civic Issue", "🗺️ Live Ward Map & Feeds", "✅ Authority Resolution Check"])
